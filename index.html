@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Switch Modded Lab | Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-color: #0088cc; 
+            --bg-dark: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --price-color: #00ff88;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 80px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+            border-bottom: 1px solid #333;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            margin: 0;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .subtitle { color: var(--text-dim); margin-top: 10px; font-weight: 300; }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Griglia dinamica */
+        #product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #222;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background-color: #252525;
+        }
+
+        .product-info { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+
+        .product-title { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; margin: 0 0 10px 0; }
+
+        .product-desc { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 15px; flex-grow: 1; }
+
+        .price { font-size: 1.6rem; font-weight: 700; color: var(--price-color); margin-bottom: 20px; }
+
+        .btn-tg {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-tg:hover { background-color: #0077b5; }
+
+        /* Loading state */
+        .loader { text-align: center; padding: 50px; font-size: 1.2rem; color: var(--accent-color); }
+
+        footer { text-align: center; padding: 60px 20px; color: #444; font-size: 0.8rem; border-top: 1px solid #222; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Switch Modded Lab</h1>
+    <p class="subtitle">Personalizzazioni artigianali su misura</p>
+</header>
+
+<div class="container">
+    <div id="product-grid">
+        <div class="loader">Connessione al database in corso...</div>
+    </div>
+</div>
+
+<footer>
+    &copy; 2026 Switch Modded Lab | Powered by Google Sheets API
+</footer>
+
+<script>
+    async function caricaProdotti() {
+        // Il tuo link CSV dal Foglio Google
+        const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7ZNHF0XtC8zrQxR45e3QA24KGvlFtts5PgHm6In9SGU5ijDgLpBR6d7jE0zFIta-BOqe3Eue0DJVt/pub?output=csv';
+        const tgUsername = 'TUO_USERNAME'; // <--- CAMBIA QUESTO
+
+        try {
+            const response = await fetch(urlCSV);
+            const data = await response.text();
+            
+            // Dividi righe e pulisci spazi
+            const righe = data.split('\n').map(r => r.split(',')).slice(1);
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = ''; 
+
+            righe.forEach(col => {
+                // Mappatura colonne basata sul tuo foglio:
+                // col[0] = Nome, col[3] = Prezzo, col[5] = Modifica
+                const nome = col[0] ? col[0].replace(/"/g, "") : "";
+                const prezzo = col[3] ? col[3].replace(/"/g, "") : "N/D";
+                const desc = col[5] ? col[5].replace(/"/g, "") : "Modifica estetica custom";
+                
+                // Placeholder per immagine (aggiungi link nel foglio per renderlo dinamico)
+                const img = "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?auto=format&fit=crop&q=80&w=400";
+
+                if (nome && nome.length > 2) {
+                    grid.innerHTML += `
+                        <article class="product-card">
+                            <img src="${img}" alt="${nome}" class="product-image">
+                            <div class="product-info">
+                                <h2 class="product-title">${nome}</h2>
+                                <p class="product-desc">${desc}</p>
+                                <span class="price">${prezzo}€</span>
+                                <a href="https://t.me/${tgUsername}" target="_blank" class="btn-tg">
+                                    Contatta su Telegram
+                                </a>
+                            </div>
+                        </article>
+                    `;
+                }
+            });
+
+            if (grid.innerHTML === '') {
+                grid.innerHTML = '<p>Nessun prodotto disponibile al momento.</p>';
+            }
+
+        } catch (error) {
+            console.error("Errore:", error);
+            document.getElementById('product-grid').innerHTML = "Errore nel caricamento del catalogo.";
+        }
+    }
+
+    window.onload = caricaProdotti;
+</script>
+
+</body>
+</html>
